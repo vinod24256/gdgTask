@@ -156,7 +156,9 @@ body {
 }
 
 .terminal-content {
-  min-height: 300px;
+  height: 300px;
+  overflow-y: auto;
+  padding-right: 15px;
 }
 
 .output p {
@@ -184,4 +186,38 @@ body {
   font-size: 16px;
   outline: none;
   flex: 1;
+}
+
+/* SECRET LEVEL 1 - Hover Effects */
+.secret-hover {
+  cursor: pointer;
+  position: relative;
+  color: #00ff00;
+  transition: color 0.3s ease;
+}
+
+.secret-hover:hover {
+  color: #ff00ff;
+  text-shadow: 0 0 10px #ff00ff;
+}
+
+.secret-hover .hidden-text {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  background: #222;
+  color: #ffff00;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 100;
+  white-space: nowrap;
+}
+
+.secret-hover:hover .hidden-text {
+  opacity: 1;
+  visibility: visible;
 }
