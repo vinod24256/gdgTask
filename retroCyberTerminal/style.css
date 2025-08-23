@@ -129,7 +129,7 @@ table {
 }
 
 body {
-  font-family: "Courier New", monospace;
+  font-family: "VT323", monospace;
   background-color: #000;
   color: #00ff00;
   height: 100vh;
@@ -138,27 +138,114 @@ body {
   align-items: center;
 }
 
+#splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  color: #00ff00;
+  text-shadow: 0 0 10px #00ff00;
+  animation: flicker 0.15s infinite;
+}
+
+#splash-screen pre {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+/* a fullscreen canavas just behind the termnial  */
+
+#matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+body::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.06),
+      rgba(0, 255, 0, 0.02),
+      rgba(0, 0, 255, 0.06)
+    );
+  z-index: 2;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  animation: flicker 0.15s infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.3;
+  }
+  60% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .terminal {
   width: 80%;
   max-width: 800px;
   background-color: #111;
   border: 2px solid #00ff00;
+  box-shadow: 0 0 20px #00ff00;
   border-radius: 10px;
   padding: 20px;
+  display: none;
 }
 
 .terminal-header {
   text-align: center;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: bold;
   margin-bottom: 20px;
   color: #00ff00;
+  text-shadow: 0 0 10px #00ff00;
+  animation: text-glow 2s infinite alternate;
 }
 
 .terminal-content {
   height: 300px;
   overflow-y: auto;
   padding-right: 15px;
+  font-size: 20px;
 }
 
 .output p {
@@ -183,12 +270,11 @@ body {
   border: none;
   color: #00ff00;
   font-family: inherit;
-  font-size: 16px;
+  font-size: 20px;
   outline: none;
   flex: 1;
 }
 
-/* SECRET LEVEL 1 - Hover Effects */
 .secret-hover {
   cursor: pointer;
   position: relative;
@@ -220,4 +306,80 @@ body {
 .secret-hover:hover .hidden-text {
   opacity: 1;
   visibility: visible;
+}
+
+@keyframes text-glow {
+  from {
+    text-shadow: 0 0 5px #00ff00;
+  }
+  to {
+    text-shadow: 0 0 15px #00ff00;
+  }
+}
+
+@keyframes screenShake {
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+  10% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+  }
+  20% {
+    transform: translate(-3px, 0px) rotate(1deg);
+  }
+  30% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+  40% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+  50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+  }
+  60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+  }
+  70% {
+    transform: translate(3px, 1px) rotate(-1deg);
+  }
+  80% {
+    transform: translate(-1px, -1px) rotate(1deg);
+  }
+  90% {
+    transform: translate(1px, 2px) rotate(0deg);
+  }
+  100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+  }
+}
+
+.shake-effect {
+  animation: screenShake 0.5s;
+}
+
+body.glitch-active {
+  animation: flicker 0.15s infinite;
+}
+
+body.glitch-active .terminal {
+  border-color: #ff0000;
+  box-shadow: 0 0 20px #ff0000;
+  animation: screenShake 1s infinite;
+}
+
+body.glitch-active .terminal-header {
+  color: #ff0000;
+  text-shadow: 0 0 10px #ff0000;
+}
+
+.blink-text {
+  font-size: 1.5rem;
+  margin-top: 20px;
+  animation: blink 1.5s linear infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
 }

@@ -4,20 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>gdg task</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <!-- -.-- --- ..- .-. / -. . -..- - / -.-. --- -- -- .- -. -.. / .. ... ---... / -... .-. . .- -.-. .... -->
+    <canvas id="matrix-bg"></canvas>
+
+    <div id="splash-screen">
+      <pre>
+        ____    __    ____  ___       __  ___  _______     __    __  .______      .__   __.  _______   ______   
+\   \  /  \  /   / /   \     |  |/  / |   ____|   |  |  |  | |   _  \     |  \ |  | |   ____| /  __  \  
+ \   \/    \/   / /  ^  \    |  '  /  |  |__      |  |  |  | |  |_)  |    |   \|  | |  |__   |  |  |  | 
+  \            / /  /_\  \   |    <   |   __|     |  |  |  | |   ___/     |  . `  | |   __|  |  |  |  | 
+   \    /\    / /  _____  \  |  .  \  |  |____    |  `--'  | |  |         |  |\   | |  |____ |  `--'  | 
+    \__/  \__/ /__/     \__\ |__|\__\ |_______|    \______/  | _|         |__| \__| |_______| \______/  
+
+  </pre
+      >
+      <p class="blink-text">[ CLICK ANYWHERE TO BEGIN ]</p>
+    </div>
     <div class="terminal">
       <div class="terminal-header">
         <span>TERMINAL</span>
       </div>
 
       <div class="terminal-content">
-        <div class="output">
-          <p>System initialized. Are you ready?</p>
-          <p>Type 'help' for available commands</p>
-        </div>
+        <div class="output"></div>
 
         <div class="input-line">
           <span class="prompt">$</span>
