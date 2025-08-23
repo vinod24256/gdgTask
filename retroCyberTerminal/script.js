@@ -4,6 +4,66 @@ const terminalContent = document.querySelector(".terminal-content");
 const commandInput = document.getElementById("command-input");
 const output = document.querySelector(".output");
 const body = document.querySelector("body");
+const splashScreen = document.getElementById("splash-screen");
+const terminal = document.querySelector(".terminal");
+
+let alarmSound;
+
+window.onload = () => {
+  document.body.addEventListener(
+    "click",
+    () => {
+      const canvas = document.getElementById("matrix-bg");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const katakana =
+        "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
+      const latin = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const nums = "0123456789";
+      const alphabet = katakana + latin + nums;
+      const fontSize = 16;
+      const columns = canvas.width / fontSize;
+      const rainDrops = [];
+      for (let x = 0; x < columns; x++) {
+        rainDrops[x] = 1;
+      }
+      const drawMatrix = () => {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#00ff00";
+        ctx.font = fontSize + "px monospace";
+        for (let i = 0; i < rainDrops.length; i++) {
+          const text = alphabet.charAt(
+            Math.floor(Math.random() * alphabet.length)
+          );
+          ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+          if (
+            rainDrops[i] * fontSize > canvas.height &&
+            Math.random() > 0.975
+          ) {
+            rainDrops[i] = 0;
+          }
+          rainDrops[i]++;
+        }
+      };
+
+      setInterval(drawMatrix, 30);
+
+      setTimeout(() => {
+        splashScreen.style.display = "none";
+        terminal.style.display = "block";
+        terminal.style.animation = "fadeIn 1s";
+        addToOutput("System initialized. Are you ready?");
+        addToOutput("Type 'help' for available commands");
+        commandInput.focus();
+      }, 2000);
+    },
+    { once: true }
+  );
+};
 
 let commandHistory = [];
 let secretFragments = [];
@@ -41,19 +101,51 @@ const commands = {
     return [new Date().toString()];
   },
 
-  scan: function () {
-    const messages = [
-      "Scanning system for anomalies...",
-      "...",
-      "FOUND: Hidden data detected in terminal output",
-    ];
-    setTimeout(() => {
-      addSecretHoverText(
-        "HINT: Some words in this terminal hide secrets. Try hovering around..."
-      );
-    }, 2000);
+  //   scan: function () {
+  //     const messages = [
+  //       "Scanning system for anomalies...",
+  //       "...",
+  //       "FOUND: Hidden data detected in terminal output",
+  //     ];
+  //     setTimeout(() => {
+  //       addSecretHoverText(
+  //         "HINT: Some words in this terminal hide secrets. Try hovering around..."
+  //       );
+  //     }, 2000);
 
-    return messages;
+  //     return messages;
+  //   },
+
+  scan: function () {
+    const p = document.createElement("p");
+    output.appendChild(p);
+    let percent = 0;
+
+    const scanInterval = setInterval(() => {
+      percent += Math.floor(Math.random() * 10) + 1;
+      if (percent > 100) {
+        percent = 100;
+      }
+
+      const progressBar = `[${"#".repeat(percent / 5)}${"-".repeat(
+        20 - percent / 5
+      )}]`;
+      p.textContent = `Scanning system for anomalies... ${progressBar} ${percent}%`;
+      terminalContent.scrollTop = terminalContent.scrollHeight;
+
+      if (percent === 100) {
+        clearInterval(scanInterval);
+
+        addToOutput("...");
+        addToOutput("FOUND: Hidden data detected in terminal output");
+        setTimeout(() => {
+          addSecretHoverText(
+            "HINT: Some words in this terminal hide secrets. Try hovering around..."
+          );
+        }, 1000);
+      }
+    }, 150);
+    return [];
   },
 
   secrets: function () {
@@ -61,19 +153,19 @@ const commands = {
     let count = 0;
 
     if (foundSecrets.level1) {
-      result.push("✓ Level 1: First fragment found - YOU");
+      result.push("✓ Level 1: First fragment found - Follow");
       count++;
     }
     if (foundSecrets.level2) {
-      result.push("✓ Level 2: Second fragment found - ARE AN");
+      result.push("✓ Level 2: Second fragment found - THE");
       count++;
     }
     if (foundSecrets.level3) {
-      result.push("✓ Level 3: Third fragment found - AMAZING");
+      result.push("✓ Level 3: Third fragment found - WHITE");
       count++;
     }
     if (foundSecrets.level4) {
-      result.push("✓ Level 3: Third fragment found - HUMAN/GENIUS");
+      result.push("✓ Level 3: Third fragment found - RABBIT");
       count++;
     }
 
@@ -82,9 +174,9 @@ const commands = {
     } else if (count === 4) {
       result.push("");
       result.push("🎉 ALL SECRETS FOUND! 🎉");
-      result.push("Master Key: CYBER-PUNK-2025");
+      result.push("Master Key: Follow The White Rabbit");
     } else {
-      result.push(`Progress: ${count}/3 secrets found`);
+      result.push(`Progress: ${count}/4 secrets found`);
     }
 
     return result;
@@ -93,19 +185,41 @@ const commands = {
     if (sysState === "stable") {
       sysState = "glitch";
       body.classList.add("glitch-active");
+
       if (!foundSecrets.level1) {
-        return ["Level 1 secret not discovered!"];
+        alarmSound = pslaySound(
+          "assets/sounds/74206__timbre__star-trek-emergency-simulation.wav"
+        );
+        setTimeout(() => {
+          stopSound(alarmSound);
+          commands.clear();
+          body.classList.remove("glitch-active");
+          addToOutput(
+            "ACCESS DENIED: System integrity must be compromised first."
+          );
+        }, 5000);
+        return [];
       }
       if (!foundSecrets.level2) {
+        alarmSound = playSound(
+          "assets/sounds/74206__timbre__star-trek-emergency-simulation.wav"
+        );
         foundSecrets.level2 = true;
-        // We use the new scrambleEffect for the success messages
+
         scrambleEffect("✓ Level 2 secret discovered!", () => {
-          // After the first line finishes, this part runs
           scrambleEffect("!!! SYSTEM INTEGRITY COMPROMISED !!!", () => {
-            // After the second line finishes, this part runs
             scrambleEffect("Firewall breached. You are in.", () => {
-              // And so on...
-              scrambleEffect("New commands may now be available.");
+              scrambleEffect(
+                "✓ Level 2 secret discovered! Fragment: THE",
+                () => {
+                  terminal.classList.add("shake-effect");
+                  setTimeout(() => {
+                    terminal.classList.remove("shake-effect");
+                    body.classList.remove("glitch-active");
+                    stopSound(alarmSound);
+                  }, 500);
+                }
+              );
             });
           });
         });
@@ -157,14 +271,14 @@ function addSecretHoverText(text) {
 
       const hiddenText = document.createElement("span");
       hiddenText.className = "hidden-text";
-      hiddenText.textContent = "First fragment: YOU";
+      hiddenText.textContent = "First fragment: Follow";
       span.appendChild(hiddenText);
 
       span.addEventListener("mouseenter", function () {
         if (!foundSecrets.level1) {
           foundSecrets.level1 = true;
           setTimeout(() => {
-            addToOutput("✓ Level 1 secret discovered! Fragment: CYBER");
+            addToOutput("✓ Level 1 secret discovered! Fragment: Follow");
           }, 500);
         }
       });
@@ -211,4 +325,17 @@ function scrambleEffect(text, onComplete) {
     }
     i++;
   }, 50);
+}
+
+function playSound(soundFile) {
+  const audio = new Audio(soundFile);
+  audio.loop = true;
+  audio.play();
+  return audio;
+}
+function stopSound(audioObject) {
+  if (audioObject) {
+    audioObject.pause();
+    audioObject.currentTime = 0;
+  }
 }
