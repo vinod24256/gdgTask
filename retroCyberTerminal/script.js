@@ -3,6 +3,7 @@
 const terminalContent = document.querySelector(".terminal-content");
 const commandInput = document.getElementById("command-input");
 const output = document.querySelector(".output");
+const body = document.querySelector("body");
 
 let commandHistory = [];
 let secretFragments = [];
@@ -10,7 +11,9 @@ let foundSecrets = {
   level1: false,
   level2: false,
   level3: false,
+  level4: false,
 };
+let sysState = "stable";
 
 const commands = {
   help: function () {
@@ -58,21 +61,25 @@ const commands = {
     let count = 0;
 
     if (foundSecrets.level1) {
-      result.push("✓ Level 1: First fragment found - CYBER");
+      result.push("✓ Level 1: First fragment found - YOU");
       count++;
     }
     if (foundSecrets.level2) {
-      result.push("✓ Level 2: Second fragment found - PUNK");
+      result.push("✓ Level 2: Second fragment found - ARE AN");
       count++;
     }
     if (foundSecrets.level3) {
-      result.push("✓ Level 3: Third fragment found - 2025");
+      result.push("✓ Level 3: Third fragment found - AMAZING");
+      count++;
+    }
+    if (foundSecrets.level4) {
+      result.push("✓ Level 3: Third fragment found - HUMAN/GENIUS");
       count++;
     }
 
     if (count === 0) {
       result.push("No secrets discovered yet. Try scanning the system...");
-    } else if (count === 3) {
+    } else if (count === 4) {
       result.push("");
       result.push("🎉 ALL SECRETS FOUND! 🎉");
       result.push("Master Key: CYBER-PUNK-2025");
@@ -81,6 +88,31 @@ const commands = {
     }
 
     return result;
+  },
+  breach: function () {
+    if (sysState === "stable") {
+      sysState = "glitch";
+      body.classList.add("glitch-active");
+      if (!foundSecrets.level1) {
+        return ["Level 1 secret not discovered!"];
+      }
+      if (!foundSecrets.level2) {
+        foundSecrets.level2 = true;
+        // We use the new scrambleEffect for the success messages
+        scrambleEffect("✓ Level 2 secret discovered!", () => {
+          // After the first line finishes, this part runs
+          scrambleEffect("!!! SYSTEM INTEGRITY COMPROMISED !!!", () => {
+            // After the second line finishes, this part runs
+            scrambleEffect("Firewall breached. You are in.", () => {
+              // And so on...
+              scrambleEffect("New commands may now be available.");
+            });
+          });
+        });
+      }
+      return [];
+    }
+    return ["System is already unstable."];
   },
 };
 
@@ -116,7 +148,6 @@ function addToOutput(text) {
 function addSecretHoverText(text) {
   const p = document.createElement("p");
 
-  // Split text to make certain words hoverable
   const words = text.split(" ");
   words.forEach((word, index) => {
     if (word === "secrets" || word === "terminal" || word === "hovering") {
@@ -126,7 +157,7 @@ function addSecretHoverText(text) {
 
       const hiddenText = document.createElement("span");
       hiddenText.className = "hidden-text";
-      hiddenText.textContent = "First fragment: CYBER";
+      hiddenText.textContent = "First fragment: YOU";
       span.appendChild(hiddenText);
 
       span.addEventListener("mouseenter", function () {
@@ -152,4 +183,32 @@ function addSecretHoverText(text) {
 
   output.appendChild(p);
   output.scrollTop = output.scrollHeight;
+}
+
+function scrambleEffect(text, onComplete) {
+  const p = document.createElement("p");
+  output.appendChild(p);
+  const chars = "!<>-_\\/[]{}—=+*^?#";
+  let i = 0;
+
+  const scrambleInterval = setInterval(() => {
+    let scrambledText = "";
+    for (let j = 0; j < text.length; j++) {
+      if (j <= i) {
+        scrambledText += text[j];
+      } else {
+        scrambledText += chars[Math.floor(Math.random() * chars.length)];
+      }
+    }
+    p.textContent = scrambledText;
+    terminalContent.scrollTop = terminalContent.scrollHeight;
+
+    if (i >= text.length) {
+      clearInterval(scrambleInterval);
+      if (onComplete) {
+        onComplete();
+      }
+    }
+    i++;
+  }, 50);
 }
