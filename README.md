@@ -2,7 +2,12 @@
 
 Welcome to the Retro Cyber Terminal, an immersive web-based challenge created for the Google Developer Group UG2 Technical Assessment. This project is a fully interactive terminal experience designed to capture the 1980s cyberpunk and 1990s hacker aesthetic, featuring a multi-layered secret key puzzle.
 
-**Live Application:** [gdg-task-six.vercel.app](https://gdg-task-six.vercel.app)
+**Live Application:** 
+[**gdg-task-six.vercel.app**](https://gdg-task-six.vercel.app)
+
+**Demonstration Video:** 
+[**Retro Cyber Terminal Demo**](https://youtu.be/mqNiDQ06sbE?feature=shared)
+
 ---
 
 ## 🚀 Why This Project Stands Out
