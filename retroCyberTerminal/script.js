@@ -1,5 +1,3 @@
-"use strict";
-
 const terminalContent = document.querySelector(".terminal-content");
 const commandInput = document.getElementById("command-input");
 const output = document.querySelector(".output");
@@ -7,7 +5,8 @@ const body = document.querySelector("body");
 const splashScreen = document.getElementById("splash-screen");
 const terminal = document.querySelector(".terminal");
 
-let alarmSound;
+let loopingSound;
+let bootUpSound;
 
 window.onload = () => {
   document.body.addEventListener(
@@ -56,10 +55,12 @@ window.onload = () => {
         splashScreen.style.display = "none";
         terminal.style.display = "block";
         terminal.style.animation = "fadeIn 1s";
+        playSingleSound("assets/sounds/boot_up.m4a");
         addToOutput("System initialized. Are you ready?");
         addToOutput("Type 'help' for available commands");
         commandInput.focus();
-      }, 2000);
+        stopSound(bootUpSound);
+      }, 1000);
     },
     { once: true }
   );
@@ -71,9 +72,21 @@ let foundSecrets = {
   level1: false,
   level2: false,
   level3: false,
-  level4: false,
 };
+
 let sysState = "stable";
+let conversationMode = false;
+
+const fileSystem = {
+  "debugger.log":
+    "FATAL ERROR in script.js: Uncaught ReferenceError: 'key' is not defined at function grant_access() line 412. Memory integrity compromised.",
+  "security_protocol.txt":
+    "System keys are generated from the session's unique process ID. Current PID: 0010067",
+
+  "access.log": "FAIL...FAIL...FAIL...LOGIN ATTEMPT...root...FAIL...",
+  "morpheus_chat.log":
+    "Morpheus: The exploit must be triggered manually. There is no other way.",
+};
 
 const commands = {
   help: function () {
@@ -157,29 +170,42 @@ const commands = {
       count++;
     }
     if (foundSecrets.level2) {
-      result.push("✓ Level 2: Second fragment found - THE");
+      result.push("✓ Level 2: Second fragment found - THE WHITE");
       count++;
     }
     if (foundSecrets.level3) {
-      result.push("✓ Level 3: Third fragment found - WHITE");
-      count++;
-    }
-    if (foundSecrets.level4) {
       result.push("✓ Level 3: Third fragment found - RABBIT");
       count++;
     }
 
     if (count === 0) {
       result.push("No secrets discovered yet. Try scanning the system...");
-    } else if (count === 4) {
+    } else if (count === 3) {
       result.push("");
       result.push("🎉 ALL SECRETS FOUND! 🎉");
       result.push("Master Key: Follow The White Rabbit");
     } else {
-      result.push(`Progress: ${count}/4 secrets found`);
+      result.push(`Progress: ${count}/3 secrets found`);
     }
 
     return result;
+  },
+  ls: function () {
+    if (sysState !== "glitch") {
+      return [`Command not found: ls`];
+    }
+    return [Object.keys(fileSystem).join("   ")];
+  },
+
+  cat: function (args) {
+    if (sysState !== "glitch") {
+      return [`Command not found: cat`];
+    }
+    const filename = args;
+    if (fileSystem[filename]) {
+      return [fileSystem[filename]];
+    }
+    return [`cat: ${filename}: No such file`];
   },
   breach: function () {
     if (sysState === "stable") {
@@ -187,48 +213,51 @@ const commands = {
       body.classList.add("glitch-active");
 
       if (!foundSecrets.level1) {
-        alarmSound = pslaySound(
-          "assets/sounds/74206__timbre__star-trek-emergency-simulation.wav"
-        );
+        loopingSound = playSound("assets/sounds/alarm.wav");
         setTimeout(() => {
-          stopSound(alarmSound);
+          stopSound(loopingSound);
           commands.clear();
           body.classList.remove("glitch-active");
           addToOutput(
             "ACCESS DENIED: System integrity must be compromised first."
           );
-        }, 5000);
+        }, 3000);
         return [];
       }
       if (!foundSecrets.level2) {
-        alarmSound = playSound(
-          "assets/sounds/74206__timbre__star-trek-emergency-simulation.wav"
-        );
+        loopingSound = playSound("assets/sounds/alarm.wav");
         foundSecrets.level2 = true;
 
-        scrambleEffect("✓ Level 2 secret discovered!", () => {
-          scrambleEffect("!!! SYSTEM INTEGRITY COMPROMISED !!!", () => {
-            scrambleEffect("Firewall breached. You are in.", () => {
-              scrambleEffect(
-                "✓ Level 2 secret discovered! Fragment: THE",
-                () => {
+        scrambleEffect(
+          "✓ Level 2 secret discovered! Fragment: THE WHITE",
+          () => {
+            scrambleEffect("!!! SYSTEM INTEGRITY COMPROMISED !!!", () => {
+              scrambleEffect("Firewall breached. You are in.", () => {
+                // This message now makes more sense
+                scrambleEffect("New commands may now be available.", () => {
                   terminal.classList.add("shake-effect");
                   setTimeout(() => {
                     terminal.classList.remove("shake-effect");
                     body.classList.remove("glitch-active");
-                    stopSound(alarmSound);
+                    stopSound(loopingSound);
                   }, 500);
-                }
-              );
+                });
+              });
             });
-          });
-        });
+          }
+        );
       }
       return [];
     }
     return ["System is already unstable."];
   },
 };
+
+commandInput.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") {
+    playSingleSound("assets/sounds/key_press.wav", 0.4);
+  }
+});
 
 commandInput.addEventListener("keypress", function (e) {
   if (e.key === "Enter") {
@@ -244,10 +273,20 @@ commandInput.addEventListener("keypress", function (e) {
 });
 
 function executeCommand(command) {
-  if (commands[command]) {
-    const result = commands[command]();
+  const [cmd, ...args] = command.split(" ");
+
+  if (commands[cmd]) {
+    // If it's a normal, safe command, run it
+    const result = commands[cmd](args.join(" "));
     result.forEach((line) => addToOutput(line));
+  } else if (sysState === "glitch") {
+    try {
+      eval(command);
+    } catch (error) {
+      addToOutput(`SYNTAX ERROR: ${error.message}`);
+    }
   } else {
+    playSingleSound("assets/sounds/error.mp3");
     addToOutput(`Command not found: ${command}`);
   }
 }
@@ -256,6 +295,13 @@ function addToOutput(text) {
   const p = document.createElement("p");
   p.textContent = text;
   output.appendChild(p);
+  terminalContent.scrollTop = terminalContent.scrollHeight;
+}
+
+function addMultiLineOutput(text) {
+  const pre = document.createElement("pre"); // Use a <pre> tag for ASCII art
+  pre.textContent = text;
+  output.appendChild(pre);
   terminalContent.scrollTop = terminalContent.scrollHeight;
 }
 
@@ -276,9 +322,11 @@ function addSecretHoverText(text) {
 
       span.addEventListener("mouseenter", function () {
         if (!foundSecrets.level1) {
+          playSingleSound("assets/sounds/secondLevelVictory.m4a");
           foundSecrets.level1 = true;
           setTimeout(() => {
             addToOutput("✓ Level 1 secret discovered! Fragment: Follow");
+            stopSound(loopingSound);
           }, 500);
         }
       });
@@ -329,13 +377,62 @@ function scrambleEffect(text, onComplete) {
 
 function playSound(soundFile) {
   const audio = new Audio(soundFile);
+  audio.addEventListener("error", () => {
+    console.log(`Could not load ${soundFile}`);
+  });
   audio.loop = true;
-  audio.play();
+  audio.play().catch((e) => console.log("Audio play failed:", e));
   return audio;
 }
+
+function playSingleSound(soundFile, volume = 1.0) {
+  const audio = new Audio(soundFile);
+  audio.volume = 0.4;
+  audio.play();
+}
+
 function stopSound(audioObject) {
   if (audioObject) {
     audioObject.pause();
     audioObject.currentTime = 0;
+  }
+}
+
+function systemCrash() {
+  stopSound(loopingSound);
+  playSingleSound("assets/sounds/crash.mp3");
+  body.innerHTML =
+    '<div id="crash-screen" style="color:red; text-align:center; font-size:2rem; padding-top: 40vh;">FATAL SYSTEM ERROR<br>...REBOOTING...</div>';
+  setTimeout(() => {
+    location.reload();
+  }, 3000);
+}
+
+function grant_access(key) {
+  if (String(key) === "0010067") {
+    if (!foundSecrets.level3) {
+      foundSecrets.level3 = true;
+      stopSound(loopingSound);
+      playSingleSound("assets/sounds/victory_theme.wav");
+      commandInput.disabled = true;
+
+      setTimeout(() => {
+        commands.clear();
+
+        scrambleEffect(">>> KERNEL ACCESS GRANTED", () => {
+          scrambleEffect(">>> MASTER KEY: Follow The White Rabbit", () => {
+            scrambleEffect(">>> PURPOSE COMPLETE.", () => {
+              scrambleEffect(">>> SELF-DESTRUCT SEQUENCE INITIATED...", () => {
+                setTimeout(() => {
+                  window.location.href = "404.html";
+                }, 3000);
+              });
+            });
+          });
+        });
+      }, 500);
+    }
+  } else {
+    systemCrash();
   }
 }
