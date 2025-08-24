@@ -82,10 +82,10 @@ The secret key, **"Follow The White Rabbit,"** is designed to be discovered thro
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
+    git clone https://github.com/vinod24256/gdgTask.git
     ```
 2.  Navigate to the project directory:
     ```bash
-    cd your-repo-name
+    cd gdgTask
     ```
 3.  Open the `index.html` file in any modern web browser. (A local server is not required).
